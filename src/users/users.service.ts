@@ -10,6 +10,7 @@ export class UsersService {
     },
     { name: 'Bob', age: 17 },
     { name: 'Charlie', age: 18 },
+    { name: 'David', age: 19 },
   ];
 
   getAllUsers() {
