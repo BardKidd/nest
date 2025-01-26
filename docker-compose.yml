@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  nestjs:
+    build: . # 使用當前資料夾下的 Dockerfile 來建構 image
+    ports: # 將 container 的 3000 port 對應到 host 的 3000 port
+      - '3000:3000'
+    volumes:
+      - .:/app # 將專案跟目錄掛載到容器的 /app 資料夾，實現熱更新
+      - /app/node_modules # 掛載 node_modules 資料夾，避免重複安裝 node_modules
+    stdin_open: true
+    tty: true
