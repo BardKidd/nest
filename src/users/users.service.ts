@@ -47,4 +47,14 @@ export class UsersService {
 
     return { message: 'User updated successfully', users: this.users };
   }
+
+  deleteUser(id: number) {
+    const user = this.users[id];
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    this.users.splice(id, 1);
+    return { message: 'User deleted successfully', users: this.users };
+  }
 }
