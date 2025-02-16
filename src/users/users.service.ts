@@ -1,60 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  private users = [
-    {
-      name: 'Alice',
-      age: 16,
-    },
-    { name: 'Bob', age: 17 },
-    { name: 'Charlie', age: 18 },
-    { name: 'David', age: 19 },
-  ];
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
-  getAllUsers() {
-    return this.users;
+  async getAllUsers(): Promise<User[]> {
+    return this.usersRepository.find();
   }
 
-  addUser(user: CreateUserDto) {
-    this.users.push(user);
-    return { message: 'User added successfully', users: this.users };
+  async addUser({ name, age }: CreateUserDto): Promise<User> {
+    const user = this.usersRepository.create({ name, age });
+    return this.usersRepository.save(user);
   }
 
-  getUserById(id: number) {
-    const user = this.users[id]; // 假設 id 是陣列索引
+  async getUserById(id: number): Promise<User> {
+    return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async updateUser(id: number, updateData: UpdateUserDto) {
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
-  }
-
-  updateUser(id: number, updateData: UpdateUserDto) {
-    const user = this.users[id];
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException('User not found');
     }
 
     // 更新資料
-    if (updateData.name) {
-      user.name = updateData.name;
-    }
-    if (updateData.age) {
-      user.age = updateData.age;
-    }
+    if (updateData.name) user.name = updateData.name;
+    if (updateData.age) user.age = updateData.age;
 
-    return { message: 'User updated successfully', users: this.users };
+    const updatedUser = await this.usersRepository.save(user);
+    return { message: 'User updated', user: updatedUser };
   }
 
-  deleteUser(id: number) {
-    const user = this.users[id];
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    this.users.splice(id, 1);
-    return { message: 'User deleted successfully', users: this.users };
+  async deleteUser(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }

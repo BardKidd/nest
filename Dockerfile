@@ -1,6 +1,7 @@
 # 使用官方 Node.js 作為基礎映像
 FROM node:18-alpine
 
+RUN apk add --no-cache sqlite sqlite-dev
 # 設定工作目錄
 WORKDIR /app
 
